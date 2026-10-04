@@ -333,6 +333,15 @@ def create_app(test_config=None):
         flash("Assignment removed.", "success")
         return redirect(url_for("performance", performance_id=assignment["performance_id"]))
 
+    @app.post("/assignments/<int:assignment_id>/toggle-confirm")
+    def toggle_assignment_confirmation(assignment_id):
+        assignment = row_or_404("SELECT * FROM assignments WHERE id = ?", (assignment_id,))
+        confirmed = 0 if assignment["confirmed"] else 1
+        db().execute("UPDATE assignments SET confirmed = ? WHERE id = ?", (confirmed, assignment_id))
+        db().commit()
+        flash("Assignment confirmed." if confirmed else "Assignment confirmation cleared.", "success")
+        return redirect(url_for("performance", performance_id=assignment["performance_id"]))
+
     @app.get("/my-roster")
     def my_roster():
         volunteer_id = request.args.get("volunteer_id", type=int)
