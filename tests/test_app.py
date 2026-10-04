@@ -66,6 +66,27 @@ def test_same_volunteer_or_role_cannot_be_assigned_twice(client):
     assert b"1 / 9 filled" in duplicate_role.data
 
 
+def test_assignment_confirmation_toggle(client, app):
+    setup_performance(client)
+    post(client, "/performances/1", {"role": "Stage manager", "volunteer_id": "1"})
+
+    with sqlite3.connect(app.config["DATABASE"]) as connection:
+        assert connection.execute("SELECT confirmed FROM assignments").fetchone()[0] == 0
+
+    confirmed = post(client, "/assignments/1/toggle-confirm", {})
+    assert b"Assignment confirmed" in confirmed.data
+    assert b"Confirmed" in confirmed.data
+
+    with sqlite3.connect(app.config["DATABASE"]) as connection:
+        assert connection.execute("SELECT confirmed FROM assignments").fetchone()[0] == 1
+
+    pending = post(client, "/assignments/1/toggle-confirm", {})
+    assert b"confirmation cleared" in pending.data
+
+    with sqlite3.connect(app.config["DATABASE"]) as connection:
+        assert connection.execute("SELECT confirmed FROM assignments").fetchone()[0] == 0
+
+
 def test_deactivation_requires_unassigning_first(client):
     setup_performance(client)
     post(client, "/performances/1", {"role": "Stage manager", "volunteer_id": "1"})
