@@ -4,11 +4,10 @@ The company's operating rule is that a volunteer may hold at most one role in
 any single performance, and an attempt to assign a second role to the same
 volunteer in the same performance must be refused with a reason.
 
-The existing suite covers this rule inside a test that also exercises the
-"one volunteer per role" rule and asserts only on the shared message
-"already assigned", so a failure of either rule alone cannot be attributed.
-The tests below exercise each rule in isolation so that a future regression
-turns exactly one named test red.
+The existing suite checks that the rule rejects a second assignment. The tests
+below add the boundaries it does not cover: a volunteer can hold a role in a
+different performance, and once an assignment is removed the volunteer and the
+position are free again.
 """
 
 import pytest
