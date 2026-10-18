@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Assignment confirmation toggle, contributed by Jin in PR #5.
 - Assignment-rule boundary tests and contribution conventions, contributed by Lu in PR #4 and integrated on the A3 delivery branch.
+- A3 regression checks for confirmation, edits, released roles and database persistence.
+
+### Fixed
+
+- Changing a confirmed assignment's volunteer or role now resets confirmation; unchanged saves and rejected edits preserve the previous state.
+- Restrict default pytest collection to the versioned tests directory so ignored temporary test copies do not inflate local counts.
+
+### Changed
+
+- Restore the container build, health and persistence CI gate from local commit d385560.
+- Document the canonical A3 repository, contribution provenance and reproducible handover steps.
 
 ## [0.1.0] - 2026-09-26
 
