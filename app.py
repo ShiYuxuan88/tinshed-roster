@@ -315,7 +315,13 @@ def create_app(test_config=None):
         if request.method == "POST":
             try:
                 role, volunteer_id = assignment_form(assignment["performance_id"], assignment_id)
-                db().execute("UPDATE assignments SET role = ?, volunteer_id = ? WHERE id = ?", (role, volunteer_id, assignment_id))
+                confirmed = assignment["confirmed"] if (
+                    role == assignment["role"] and volunteer_id == assignment["volunteer_id"]
+                ) else 0
+                db().execute(
+                    "UPDATE assignments SET role = ?, volunteer_id = ?, confirmed = ? WHERE id = ?",
+                    (role, volunteer_id, confirmed, assignment_id),
+                )
                 db().commit()
                 flash("Assignment updated.", "success")
                 return redirect(url_for("performance", performance_id=assignment["performance_id"]))
