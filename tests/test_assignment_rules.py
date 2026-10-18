@@ -10,6 +10,8 @@ different performance, and once an assignment is removed the volunteer and the
 position are free again.
 """
 
+import sqlite3
+
 import pytest
 
 from app import create_app
@@ -64,7 +66,7 @@ def seed(client):
     )
 
 
-def test_volunteer_cannot_hold_two_roles_in_one_performance(client):
+def test_volunteer_cannot_hold_two_roles_in_one_performance(client, app):
     """The rule itself, with no other rule in play."""
     seed(client)
     post(client, "/performances/1", {"role": "Stage manager", "volunteer_id": "1"})
@@ -73,6 +75,10 @@ def test_volunteer_cannot_hold_two_roles_in_one_performance(client):
 
     assert b"already assigned" in refused.data
     assert b"1 / 9 filled" in refused.data
+    with sqlite3.connect(app.config["DATABASE"]) as connection:
+        assert connection.execute(
+            "SELECT performance_id, role, volunteer_id FROM assignments"
+        ).fetchall() == [(1, "Stage manager", 1)]
 
 
 def test_volunteer_can_hold_a_role_in_a_different_performance(client):
@@ -86,7 +92,7 @@ def test_volunteer_can_hold_a_role_in_a_different_performance(client):
     assert b"Alex Morgan" in accepted.data
 
 
-def test_role_cannot_be_filled_twice_in_one_performance(client):
+def test_role_cannot_be_filled_twice_in_one_performance(client, app):
     """The second rule in isolation, so that the two can fail independently."""
     seed(client)
     post(client, "/performances/1", {"role": "Stage manager", "volunteer_id": "1"})
@@ -95,6 +101,10 @@ def test_role_cannot_be_filled_twice_in_one_performance(client):
 
     assert b"already assigned" in refused.data
     assert b"1 / 9 filled" in refused.data
+    with sqlite3.connect(app.config["DATABASE"]) as connection:
+        assert connection.execute(
+            "SELECT performance_id, role, volunteer_id FROM assignments"
+        ).fetchall() == [(1, "Stage manager", 1)]
 
 
 def test_the_rule_releases_once_the_assignment_is_removed(client):
